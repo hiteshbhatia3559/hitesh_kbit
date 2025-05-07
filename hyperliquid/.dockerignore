@@ -1,0 +1,20 @@
+# Ignore target directories
+target/
+hyperliquid-rust-sdk/target/
+
+# Ignore git files
+.git/
+.gitignore
+
+# Ignore UI build artifacts
+ui/node_modules/
+ui/build/
+
+# Ignore temporary files
+**/*.rs.bk
+**/*.swp
+**/*.swo
+
+# Ignore environment files with sensitive information
+.env
+*.env 

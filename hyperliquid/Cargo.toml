@@ -1,0 +1,35 @@
+[package]
+name = "hyperliquid-market-maker"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "hyperliquid_market_maker"
+path = "src/lib.rs"
+
+[[bin]]
+name = "hyperliquid-market-maker"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1.29", features = ["full"] }
+env_logger = "0.10.0"
+log = "0.4.19"
+redis = { version = "0.23.0", features = ["tokio-comp", "connection-manager"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+ethers = { version = "2.0", features = ["eip712", "abigen"] }
+chrono = "0.4.26"
+futures = "0.3"
+hyper = { version = "0.14", features = ["full"] }
+reqwest = { version = "0.11", features = ["json"] }
+thiserror = "1.0"
+
+# Local dependency
+hyperliquid_rust_sdk = { path = "hyperliquid-rust-sdk" }
+
+[workspace]
+members = [
+    ".",
+    "hyperliquid-rust-sdk"
+]

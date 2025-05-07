@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+
+  hyperliquid-symbol-scanner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./config:/app/config
+    environment:
+      - RUST_LOG=info
+      - REDIS_URL=redis://redis:6379
+      - MODE=SymbolScanner
+    depends_on:
+      - redis
+    ports:
+      - "8078:8078"  # Exposing API port
+    
+  hyperliquid-position-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./config:/app/config
+    environment:
+      - RUST_LOG=info
+      - REDIS_URL=redis://redis:6379
+      - MODE=PositionManager
+    depends_on:
+      - redis
+    ports:
+      - "8079:8079"  # Exposing API port
+
+  hyperliquid-config-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./config:/app/config
+    environment:
+      - RUST_LOG=info
+      - REDIS_URL=redis://redis:6379
+      - MODE=ConfigService
+    depends_on:
+      - redis
+    ports:
+      - "8077:8077"  # Exposing API port
+
+  hyperliquid-market-maker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./config:/app/config
+    environment:
+      - RUST_LOG=info
+      - REDIS_URL=redis://redis:6379
+      - HYPERLIQUID_WALLET_KEY=${HYPERLIQUID_WALLET_KEY:-e908f86dbb4d55ac876378565aafeabc187f6690f046459397b17d9b9a19688e}
+      - MODE=MarketMaker
+    depends_on:
+      - redis
+      - hyperliquid-config-service
+      - hyperliquid-position-manager
+    ports:
+      - "8080:8080"  # Exposing API port
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # UI service (minimal implementation)
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+      - hyperliquid-market-maker
+
+volumes:
+  redis-data: 
